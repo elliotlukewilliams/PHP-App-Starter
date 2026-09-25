@@ -28,6 +28,7 @@
     $value_class = "profile-edit-field ml-4 text-right placeholder:text-blue-950/70 outline-0";
 
     $modal_id = uniqid("modal-");
+    $delete_modal_id = uniqid("modal-");
 ?>
 <main class="bg-slate-50 min-h-screen">
     <section class="py-16">
@@ -79,11 +80,17 @@
                     </time>
                 </div>
                 
-                <!-- Edit Profile Button -->
-                <div class="flex justify-center">
+                <!-- Edit Profile / Delete Account Buttons -->
+                <div class="flex flex-col items-center gap-4">
                     <button data-modal-trigger="<?php echo($modal_id); ?>" class="button primary mx-auto">
                         Edit profile
                         <span class="block size-4 pointer-events-none"><?php echo(get_svg_icon("edit")); ?></span>
+                    </button>
+                    <button 
+                        data-modal-trigger="<?php echo($delete_modal_id); ?>" 
+                        class="text-blue-600 underline hover:text-blue-400 transition-colors duration-200 cursor-pointer"
+                    >
+                        Delete account
                     </button>
                 </div>
             </div>
@@ -100,6 +107,16 @@
             "modal_template" => "profile-edit",
             "persistent" => true,
             "modal_args" => [ "user" => $current_user ]
+        ]
+    );
+
+    // Delete account confirmation modal
+    get_component(
+        path: "modal/modal-base",
+        args: [
+            "modal_id" => $delete_modal_id,
+            "modal_template" => "delete-account",
+            "persistent" => true
         ]
     );
 

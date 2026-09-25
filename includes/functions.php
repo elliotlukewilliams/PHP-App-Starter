@@ -78,6 +78,25 @@
     }
 
     /**
+     * End the current session: clear its data, expire the session cookie and destroy it
+     * @return bool - True if the session was destroyed
+     */
+    function end_session(): bool {
+        start_session();
+        $_SESSION = [];
+        $cookie_params = session_get_cookie_params();
+        setcookie(session_name(), "", [
+            "expires"  => time() - 3600,
+            "path"     => $cookie_params["path"],
+            "domain"   => $cookie_params["domain"],
+            "secure"   => $cookie_params["secure"],
+            "httponly" => $cookie_params["httponly"],
+            "samesite" => $cookie_params["samesite"]
+        ]);
+        return session_destroy();
+    }
+
+    /**
      * Escape a value for safe output in HTML text or attributes
      * @param value - The value to escape
      * @return string
@@ -395,6 +414,28 @@
             return $target_dir . $new_file_name;
         }
         return new Error("Unable to upload image");
+    }
+
+    /**
+     * Delete an image previously saved by upload_image()
+     * @param relative_path - The path returned by upload_image(), e.g. /public/images/uploads/abc.png
+     * @return bool - True if the file was deleted or didn't exist, false on failure or if the path isn't an upload
+     */
+    function delete_uploaded_image(string $relative_path): bool {
+        $uploads_dir = "/public/images/uploads/";
+        if (!str_starts_with($relative_path, $uploads_dir)) {
+            return false;
+        }
+        // Only use the file name so the path can never point outside the uploads directory
+        $file_name = basename($relative_path);
+        if ($file_name === "" || $file_name === ".htaccess") {
+            return false;
+        }
+        $file_path = APP_ROOT . $uploads_dir . $file_name;
+        if (!file_exists($file_path)) {
+            return true;
+        }
+        return unlink($file_path);
     }
 
     /**

@@ -178,24 +178,34 @@
         }
 
         /**
-         * Delete user in database
+         * Delete user in database, along with their uploaded profile image.
+         * Pending password reset requests are removed by the foreign key (ON DELETE CASCADE)
          * @param user_email_or_id
-         * @return bool - True on successful deletion or false on failure
+         * @return bool - True on successful deletion or false on failure (including if the user doesn't exist)
          */
         public function delete(string | int $user_email_or_id) {
             /* Get/check db connection */
             global $db_connection;
             init_db();
 
-            // Set SQL
-            $field = is_int($user_email_or_id) ? "id" : "email";
-            $sql = "DELETE FROM users WHERE {$field} = :{$field}";
+            // Get the user first so we know which profile image to remove
+            $user = $this->get($user_email_or_id);
+            if (!$user || empty($user["id"])) {
+                return false;
+            }
 
-            // Prepare statement
-            $stmt = $db_connection->prepare($sql);
-    
             // Delete from db
-            return $stmt->execute([":{$field}" => $user_email_or_id]);
+            $stmt = $db_connection->prepare("DELETE FROM users WHERE id = :id");
+            if (!$stmt->execute([":id" => $user["id"]]) || $stmt->rowCount() < 1) {
+                return false;
+            }
+
+            // Remove profile image. The account is already gone, so a failure here is logged rather than returned
+            if (!empty($user["image_url"]) && !delete_uploaded_image($user["image_url"])) {
+                debug_log("Unable to delete profile image for deleted user {$user["id"]}: {$user["image_url"]}");
+            }
+
+            return true;
         }
 
         /**

@@ -25,7 +25,7 @@
 ?>
 
 <div class="rounded-md shadow-md p-6 bg-white z-20 fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-9/10 sm:max-w-lg lg:w-1/3 max-h-11/12 overflow-y-auto animate-fade-in">
-    <form id="profile-edit-form" enctype="multipart/form-data" class="relative flex flex-col gap-6" data-component="profile-edit">
+    <form id="profile-edit-form" enctype="multipart/form-data" class="relative flex flex-col gap-6" data-component="profile">
         <h2 class="text-3xl text-center">Edit your details</h2>
 
         <!-- Profile Picture -->

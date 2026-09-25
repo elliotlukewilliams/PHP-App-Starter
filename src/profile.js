@@ -1,8 +1,13 @@
 /**
+ * Account page functionality: profile edit and account deletion
+ */
+
+/**
  * GLOBAL SCOPE
  */
 // DOM elements
 const PROFILE_UPDATE_FORM_ELEMENT = document.getElementById('profile-edit-form')
+const DELETE_ACCOUNT_FORM_ELEMENT = document.getElementById('delete-account-form')
 const PROFILE_IMAGE_EDIT_TOGGLE = document.getElementById('profile-image-edit-panel-toggle')
 const PROFILE_IMAGE_EDIT_INPUT_FIELD = document.getElementById('profile-edit-image')
 const REMOVE_PROFILE_IMAGE_BUTTON = document.getElementById('remove-profile-image')
@@ -15,6 +20,9 @@ let OLD_PROFILE_UPDATE_FORM_DATA =
 
 // Track if profile image has been updated
 let PROFILE_IMAGE_UPDATED = false
+
+// Fallback error message for unexpected failures
+const GENERIC_ERROR_MESSAGE = 'Sorry, something went wrong. Please try again later'
 
 // Open or close the profile image edit panel when clicking on the profile image trigger
 const toggleProfileImageEditPanel = () => {
@@ -36,8 +44,8 @@ const toggleProfileImageEditPanel = () => {
     }
 }
 
-const toggleLoadingState = () => {
-    const loader = document.getElementById('profile-edit-loader')
+const toggleLoadingState = (loaderId = 'profile-edit-loader') => {
+    const loader = document.getElementById(loaderId)
     if (loader) {
         loader.classList.toggle('hidden')
 
@@ -49,16 +57,16 @@ const toggleLoadingState = () => {
     }
 }
 
-const showErrorMessage = (errorMessage) => {
-    const errorOutput = PROFILE_UPDATE_FORM_ELEMENT.querySelector('output')
+const showErrorMessage = (errorMessage, formElement = PROFILE_UPDATE_FORM_ELEMENT) => {
+    const errorOutput = formElement?.querySelector('output')
     if (!errorOutput) return
 
     errorOutput.classList.add('active')
     errorOutput.innerHTML = errorMessage
 }
 
-const clearErrors = () => {
-    PROFILE_UPDATE_FORM_ELEMENT.querySelectorAll("output.active").forEach(error => {
+const clearErrors = (formElement = PROFILE_UPDATE_FORM_ELEMENT) => {
+    formElement?.querySelectorAll("output.active").forEach(error => {
         error.classList.remove("active")
         error.innerHTML = ''
     })
@@ -230,6 +238,40 @@ const submitProfileEdit = async () => {
     }
 }
 
+// Delete the current user's account, then redirect to the homepage
+const submitDeleteAccount = async () => {
+    const loaderId = 'delete-account-loader'
+    let isRedirecting = false
+
+    try {
+        toggleLoadingState(loaderId)
+        clearErrors(DELETE_ACCOUNT_FORM_ELEMENT)
+
+        const response = await fetch('/includes/endpoints/handle-user-delete.php', {
+            method: 'POST'
+        })
+
+        // A non-JSON response (e.g. a server error page) throws here and is handled below
+        const result = await response.json()
+
+        if (result?.status !== 200) {
+            showErrorMessage(result?.data?.error_message || GENERIC_ERROR_MESSAGE, DELETE_ACCOUNT_FORM_ELEMENT)
+            return
+        }
+
+        // Account deleted and logged out. Keep the loading state while the browser navigates away
+        isRedirecting = true
+        window.location.href = '/'
+    } catch (error) {
+        console.error(error)
+        showErrorMessage(GENERIC_ERROR_MESSAGE, DELETE_ACCOUNT_FORM_ELEMENT)
+    } finally {
+        if (!isRedirecting) {
+            toggleLoadingState(loaderId)
+        }
+    }
+}
+
 // Check one-time local-storage value and show success toast notification after submission page reload
 const maybeShowSuccessToast = () => {
     if (localStorage.getItem('profileUpdated')) {
@@ -270,8 +312,21 @@ if (PROFILE_UPDATE_FORM_ELEMENT && PROFILE_UPDATE_FORM_ELEMENT instanceof HTMLFo
     })
 }
 
+// Delete account form submit event - prevent default to allow AJAX submission
+if (DELETE_ACCOUNT_FORM_ELEMENT && DELETE_ACCOUNT_FORM_ELEMENT instanceof HTMLFormElement) {
+    DELETE_ACCOUNT_FORM_ELEMENT.addEventListener('submit', (e) => {
+        e.preventDefault()
+        submitDeleteAccount()
+    })
+}
+
 // Show update success message after page reload
 maybeShowSuccessToast()
 
-// Reset form if modal is closed
-window.addEventListener('modalClosed', (e) => { resetProfileEditForm(e) })
+// Reset forms if modal is closed
+window.addEventListener('modalClosed', (e) => {
+    if (PROFILE_IMAGE_EDIT_TOGGLE) {
+        resetProfileEditForm(e)
+    }
+    clearErrors(DELETE_ACCOUNT_FORM_ELEMENT)
+})
