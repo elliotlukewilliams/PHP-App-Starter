@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+@theme {
+    --color-*: initial;
+
+    --color-white: #ffffff;
+    --color-black: #000000;
+    --color-red: #ff0000;
+    --color-green: #2e9000;
+
+    --color-blue-50: #f1f6fd;
+    --color-blue-100: #dfeafa;
+    --color-blue-200: #c6dbf7;
+    --color-blue-300: #9ec4f2;
+    --color-blue-400: #70a5ea;
+    --color-blue-500: #4f84e2;
+    --color-blue-600: #3a68d6;
+    --color-blue-700: #3358cc;
+    --color-blue-800: #2e469f;
+    --color-blue-900: #2a3e7e;
+    --color-blue-950: #1e284d;
+
+    --color-teal-50: #e6f4f6;
+    --color-teal-100: #c7e7ea;
+    --color-teal-200: #97d0d6;
+    --color-teal-300: #5eb8c0;
+    --color-teal-400: #289fab;
+    --color-teal-500: #017582;
+    --color-teal-600: #005b65;
+    --color-teal-700: #004249;
+    --color-teal-800: #002b30;
+    --color-teal-900: #001314;
+    --color-teal-950: #12313a;
+
+    --color-gray-50: #f6f7f8;
+    --color-gray-100: #f0f1f3;
+    --color-gray-200: #dbdde2;
+    --color-gray-300: #c2c7ce;
+    --color-gray-400: #a4aab6;
+    --color-gray-500: #8e94a3;
+    --color-gray-600: #7c8294;
+    --color-gray-700: #707385;
+    --color-gray-800: #5e606f;
+    --color-gray-900: #4e505a;
+    --color-gray-950: #323339;
+
+    --font-poppins: Poppins, sans-serif;
+
+    /* Animations */
+
+    --animate-fade-in: fade-in 0.2s ease-in;
+    @keyframes fade-in {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+
+    --animate-drift-up: drift-up 0.2s ease-out;
+    @keyframes drift-up {
+        0% {
+            transform: translateY(0.5rem);
+            opacity: 0
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1
+        }
+    }
+}
+
+@utility container {
+
+    margin-inline: auto;
+    padding-inline: 1rem;
+
+    @variant md {
+        padding-inline: 2rem;
+    }
+    @variant lg {
+        padding-inline: 4rem;
+    }
+    @variant xl {
+        padding-inline: 5rem;
+    }
+}
+
+@utility link {
+    color: var(--color-blue-700);
+    text-decoration: underline;
+    text-underline-offset: 0.25rem;
+    transition-property: color;
+    transition-duration: 200;
+
+    @variant hover {
+        color: var(--color-blue-500);
+    }
+}
+
+/* Headings */
+h1,h2,h3,h4,h5,h6 {
+    @apply font-bold;
+}
+
+/* Form Styling */
+input[type=text]:not(.form-unset input),
+input[type=email]:not(.form-unset input),
+input[type=tel]:not(.form-unset input),
+input[type=number]:not(.form-unset input),
+input[type=date]:not(.form-unset input),
+input[type=password]:not(.form-unset input),
+textarea:not(.form-unset textarea),
+select {
+    @apply 
+        block w-full p-3 border border-gray-950 rounded-sm
+        placeholder-gray-400
+        focus:outline-none focus:border-blue-500;
+}
+label:not(.form-unset label) {
+    @apply flex flex-col gap-1;
+}
+label:has(input[type=hidden]) {
+    @apply hidden;
+}
+form output {
+    @apply text-red font-medium text-sm;
+}
+form output.success {
+    @apply text-green;
+}
+form output:not(.active) {
+    @apply hidden;
+}
+
+/* Links */
+a:not(.link-unset) {
+    @apply link;
+}
+
+/* Buttons */
+.button {
+    @apply 
+        inline-flex items-center justify-center 
+        gap-2 px-4 py-3 rounded-md 
+        text-center font-semibold cursor-pointer border 
+        transition-colors duration-200;
+}
+.button.primary {
+    @apply bg-blue-700 border-blue-700 text-white hover:bg-blue-600 hover:border-blue-600;
+}
+.button.secondary {
+    @apply border-blue-700 text-blue-700;
+}

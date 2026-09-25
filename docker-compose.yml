@@ -1,0 +1,44 @@
+services:
+  web:
+    build: .
+    ports:
+      - "${APP_PORT}:80" # Apache/PHP
+      - ${VITE_DEV_PORT} # Vite dev server
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    environment: # ENV
+      APP_ENV: ${APP_ENV}
+      APP_ORIGIN: ${APP_ORIGIN}
+      VITE_DEV_PORT: ${VITE_DEV_PORT}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_AUTH: ${SMTP_AUTH}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM_ADDRESS: ${SMTP_FROM_ADDRESS}
+  db:
+    image: mysql
+    ports:
+      - "${DB_PORT}:${DB_PORT}" # Expose DB port if needed
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db:/var/lib/mysql
+  mailhog:
+    image: mailhog/mailhog:latest # Mailhog SMTP server for emailing from localhost
+    restart: always
+    ports:
+      - "${SMTP_PORT}:${SMTP_PORT}" # SMTP server
+      - 8025:8025 # Web UI
+volumes: 
+  db: {}
