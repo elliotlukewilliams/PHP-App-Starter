@@ -1,4 +1,18 @@
+# Disable directory listings (e.g. browsing all uploaded images)
+Options -Indexes
+
 RewriteEngine On
+
+# Block hidden files and folders such as .env and .git (.well-known is left reachable)
+RewriteRule "(^|/)\.(?!well-known/)" - [F,L]
+
+# Block internal source, config and dependency files. Only routed pages, the endpoints,
+# and static assets (dist, public) should be reachable directly
+RewriteRule ^(components|pages|migrations|vendor|node_modules|src)(/|$) - [F,L]
+RewriteRule ^includes/(?!endpoints/) - [F,L]
+RewriteRule ^(Dockerfile|docker-compose\.yml|start-app\.sh|composer\.(json|lock)|package(-lock)?\.json|tsconfig\.json|vite\.config\.ts)$ - [F,L]
+RewriteRule \.log$ - [F,L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]

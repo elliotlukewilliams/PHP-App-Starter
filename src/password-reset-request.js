@@ -108,7 +108,7 @@ const sendPasswordResetRequest = async (event) => {
                 new CustomEvent('showtoast', {
                     detail: {
                         toastId: 'email-sent-toast-notification',
-                        message: 'Password reset email sent'
+                        message: result.message ?? 'Password reset email sent'
                     }
                 })
             )

@@ -6,7 +6,7 @@ global $db_connection;
 
 // Load .env
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../");
-$dotenv->load();
+$dotenv->safeLoad(); // Env may already be provided by the container
 
 init_db();
 

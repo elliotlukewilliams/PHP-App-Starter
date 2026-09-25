@@ -1,0 +1,7 @@
+# Uploaded files must never be executed as code
+<FilesMatch "\.(?i:php\d*|phtml|phar)$">
+    Require all denied
+</FilesMatch>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>

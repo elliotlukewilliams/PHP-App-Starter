@@ -1,7 +1,7 @@
 <?php
     // First check we have a unique token in the url
     $token = isset($_GET["token"]) ? $_GET["token"] : null;
-    if (empty($token)) {
+    if (empty($token) || !is_string($token)) {
         exit();
     }
 ?>
@@ -34,7 +34,7 @@
                     "validation_error_message" => ""
                 ]);
             ?>
-            <input name="unique_token" type="hidden" value="<?php echo(filter_var($token)); // Hidden input containing unique token ?>">
+            <input name="unique_token" type="hidden" value="<?php echo(esc($token)); // Hidden input containing unique token ?>">
             <output class="message"></output>
             <button type="submit" class="button primary relative">
                 <span class="btn-text">Reset Password</span>

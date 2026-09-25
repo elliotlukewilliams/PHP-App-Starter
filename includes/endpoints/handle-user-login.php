@@ -2,71 +2,42 @@
     // Include User class
     require_once(realpath($_SERVER["DOCUMENT_ROOT"]) . "/includes/classes/class-user.php");
 
+    init_app();
+    require_same_origin_post();
+
     try {
-        // Get/check signup data
+        // Get/check login data
         $submit_data = json_decode(file_get_contents("php://input"), true);
         if (empty($submit_data) || !is_array($submit_data)) {
-            echo(json_encode([
-                "status" => 400,
-                "message" => "Login data missing in request body",
-                "data" => [
-                    "error_field" => null,
-                    "error_message" => "Sorry, something went wrong. Please try again later"
-                ]
-            ]));
-            http_response_code(400);
-            die();
+            json_response(400, "Login data missing in request body", [
+                "error_field" => null,
+                "error_message" => "Sorry, something went wrong. Please try again later"
+            ]);
         }
-        
+
         // Merge expected keys
         $submit_data = array_merge([
             "email" => "",
             "password" => ""
         ], $submit_data);
-        $email = $submit_data["email"];
-        $password = $submit_data["password"];
+        $email = (string) $submit_data["email"];
+        $password = (string) $submit_data["password"];
 
         // Log user in, return errors if not successful
         $user = new User();
         $user_logged_in = $user->login($email, $password);
         if ($user_logged_in instanceof Error) {
-            echo(json_encode([
-                "status" => 401,
-                "message" => $user_logged_in->getMessage(),
-                "data" => [
-                    "error_field" => match($user_logged_in->getCode()) { 
-                        1 => "login_email", 
-                        2 => "login_password", 
-                        default => "" 
-                    },
-                    "error_message" => $user_logged_in->getMessage()
-                ]
-            ]));
-            http_response_code(401);
-            die();
+            json_response(401, $user_logged_in->getMessage(), [
+                "error_field" => null,
+                "error_message" => $user_logged_in->getMessage()
+            ]);
         }
 
         // User session started, return success
-        echo(json_encode([
-            "status" => 200,
-            "message" => "Login success",
-            "data" => [
-                "user" => $user_logged_in
-            ]
-        ]));
-        http_response_code(200);
-        die();
-
-    } catch (Error $error) {
-        echo(json_encode([
-            "status" => 500,
-            "message" => $error->getMessage(),
-            "data" => [
-                "error_field" => null,
-                "error_message" => "Sorry, something went wrong. Please try again later"
-            ]
-        ]));
-        http_response_code(500);
-        die();
+        json_response(200, "Login success", [
+            "user" => $user_logged_in
+        ]);
+    } catch (Throwable $error) {
+        json_server_error($error);
     }
 ?>

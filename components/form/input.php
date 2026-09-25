@@ -32,13 +32,13 @@
             if ($html_tag !== "textarea") 
                 echo("type=\"{$type}\""); 
         ?>
-        name="<?php echo($name); ?>"
-        id="<?php echo($id); ?>"
+        name="<?php echo(esc($name)); ?>"
+        id="<?php echo(esc($id)); ?>"
         maxlength="<?php echo(intval($max)); ?>"
         <?php 
             if ($placeholder) : 
         ?>
-            placeholder="<?php echo($placeholder); ?>"
+            placeholder="<?php echo(esc($placeholder)); ?>"
         <?php 
             endif;
             if ($required) :
@@ -48,12 +48,12 @@
             endif;
             if ($value) :
         ?>
-            value="<?php echo($value); ?>"
+            value="<?php echo(esc($value)); ?>"
         <?php 
             endif;
         ?>
         class="peer"
-    ><?php if ($html_tag === "textarea") { echo("{$value}</textarea>");} // Output value and close tag if textarea ?>
+    ><?php if ($html_tag === "textarea") { echo(esc($value) . "</textarea>");} // Output value and close tag if textarea ?>
     <?php
         if (is_string($validation_error_message)) : 
     ?>
@@ -65,7 +65,7 @@
         if ($description) :
     ?>
         <span 
-            aria-describes="<?php echo($id); ?>" 
+            aria-describes="<?php echo(esc($id)); ?>" 
             class="description text-sm text-gray-600 max-h-0 overflow-hidden peer-focus:max-h-screen transition-all duration-400 delay-300 ease-in-out"
         >
             <?php echo($description); ?>

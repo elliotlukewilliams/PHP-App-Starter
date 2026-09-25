@@ -44,14 +44,14 @@
                             <?php echo(get_svg_icon("user")); ?>
                         </span>
                     <?php else : ?>
-                        <img src="<?php echo($current_user["image_url"]); ?>" class="size-full object-cover object-center">
+                        <img src="<?php echo(esc($current_user["image_url"])); ?>" class="size-full object-cover object-center">
                     <?php endif; ?>
                 </figure>
                 
                 <!-- Bio -->
                 <?php if (!empty($current_user["bio"])) : ?>
                     <p class="w-full text-center mb-8">
-                        <?php echo($current_user["bio"]); ?>
+                        <?php echo(esc($current_user["bio"])); ?>
                     </p>
                 <?php endif; ?>
 
@@ -59,7 +59,7 @@
                 <div class="<?php echo($label_class); ?>">
                     <span class="<?php echo($label_span_class); ?>">First Name</span>
                     <p class="<?php echo($value_class); ?>">
-                        <?php echo($current_user["first_name"]); ?>
+                        <?php echo(esc($current_user["first_name"])); ?>
                     </p>
                 </div>
 
@@ -67,7 +67,7 @@
                 <div class="<?php echo($label_class); ?>">
                     <span class="<?php echo($label_span_class); ?>">Last Name</span>
                     <p class="<?php echo($value_class); ?>">
-                        <?php echo($current_user["last_name"]); ?>
+                        <?php echo(esc($current_user["last_name"])); ?>
                     </p>
                 </div>
                 
@@ -75,7 +75,7 @@
                 <div class="<?php echo($label_class); ?>">
                     <span class="<?php echo($label_span_class); ?>">Date Registered</span>
                     <time class="ml-4 text-right">
-                        <?php echo(date("d/m/Y", $current_user["created_at"])); ?>
+                        <?php echo(date("d/m/Y", (int) $current_user["created_at"])); ?>
                     </time>
                 </div>
                 

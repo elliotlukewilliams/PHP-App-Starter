@@ -13,9 +13,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="<?php echo($meta_description) ?>">
+    <meta name="description" content="<?php echo(esc($meta_description)); ?>">
     <link href="dist/style.css" rel="stylesheet" />
-    <title><?php echo($title); ?></title>
+    <title><?php echo(esc($title)); ?></title>
 </head>
 <body class="text-blue-950 font-poppins [&:has(.modal-trigger:checked)]:overflow-y-hidden">
     <header class="shadow-md bg-white">

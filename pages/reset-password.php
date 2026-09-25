@@ -1,6 +1,6 @@
 <?php
     // Check token in GET param
-    if (empty($_GET["token"])) {
+    if (empty($_GET["token"]) || !is_string($_GET["token"])) {
         header("Location: /login");
         exit();
     }

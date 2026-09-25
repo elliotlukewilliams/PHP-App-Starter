@@ -4,6 +4,12 @@
 
     class User {
 
+        /**
+         * Hash of a random string, verified against when a login email doesn't exist
+         * so failed logins take the same time whether or not the account exists
+         */
+        private const DUMMY_PASSWORD_HASH = '$2y$10$O7J6F/ZoAFx/42kbmGrpke/N4zC0./gfZpM2JX.V6.RjRFUhGD40q';
+
         public $id = -1;
         public string | null $email = null;
         public string | null $first_name = null;
@@ -77,11 +83,25 @@
         }
 
         /**
-         * Gets a user by their unique identifier which can be either an email address or user id
+         * Gets a user by their unique identifier which can be either an email address or user id.
+         * The password hash is removed so it can't leak into templates or responses
          * @param user_email_or_id
          * @return array - The User data if found in the database or false if not
          */
         public function get(string | int $user_email_or_id) {
+            $user = $this->find($user_email_or_id);
+            if (is_array($user)) {
+                unset($user["password"]);
+            }
+            return $user;
+        }
+
+        /**
+         * Gets the full user row including the password hash. Keep private: only use for credential checks
+         * @param user_email_or_id
+         * @return array|false - The full user row if found in the database or false if not
+         */
+        private function find(string | int $user_email_or_id) {
             /* Get/check db connection */
             global $db_connection;
             init_db();
@@ -127,7 +147,6 @@
 
                 // No valid fields to update
                 if (empty($fields_to_update)) {
-                    debug_log("2");
                     return false;
                 }
 
@@ -192,14 +211,16 @@
          * @return this/Error - Returns updates user object on success, false on failure
          */
         public function login(string $email, string $password) {
-            // Check if user exists in database
-            $searched_user = $this->get($email);
-            if (!$searched_user) {
-                return new Error(message: "User with the email address {$email} does not exist", code: 1);
+            // Check if user exists in database and the password matches. Use the same error for both
+            // so the login form can't be used to discover which email addresses have accounts
+            $searched_user = $this->find($email);
+            $password_hash = $searched_user["password"] ?? self::DUMMY_PASSWORD_HASH;
+            if (!password_verify($password, $password_hash) || !$searched_user) {
+                return new Error(message: "Incorrect email or password");
             }
 
             // Excplicitly check array keys for important info
-            if (empty($searched_user["id"]) || empty($searched_user["password"])) {
+            if (empty($searched_user["id"])) {
                 return new Error(message: "Error: Unexpected result returned fron database");
             }
 
@@ -212,13 +233,9 @@
                 "image_url" => ""
             ], $searched_user);
 
-            // Hash password and check if match
-            if (!password_verify($password, $searched_user["password"])) {
-                return new Error(message: "Incorrect password", code: 2);
-            }
-            
-            // User exists + password matches, start session
-            if (session_start()) {
+            // User exists + password matches, issue a new session id to prevent session fixation
+            start_session();
+            if (session_regenerate_id(true)) {
                 $this->is_logged_in = true;
 
                 // Set user properties
@@ -250,9 +267,9 @@
             global $db_connection;
             init_db();
 
-            // First check if user exists
+            // First check if user exists. Report success either way so this can't be used to discover accounts
             if (!$this->get($email)) {
-                return new Error("User with this email address does not exists", 401);
+                return true;
             }
             // Generate random token to send in email
             $token = bin2hex(random_bytes(50));
@@ -296,7 +313,12 @@
             // Set up email content
             $subject = "Reset your password";
             $to = $email;
-            $link = "{$_SERVER["HTTP_HOST"]}/reset-password?token={$token}";
+            // Build from the configured origin, never the request Host header which an attacker can spoof
+            $origin = rtrim(getenv("APP_ORIGIN"), "/");
+            if (empty($origin)) {
+                return new Error("APP_ORIGIN is not configured", 500);
+            }
+            $link = "{$origin}/reset-password?token={$token}";
             $message = "
                 <p><a href=\"{$link}\" target=\"_blank\">Click here</a> to reset your password.</p>
                 <p>This link will expire in one hour. If you did not request to reset your password, please disregard.</p>
@@ -350,9 +372,11 @@
             $one_hour = 60*60;
             $token_created_at = $found_row["created_at"];
             if ($token_created_at + $one_hour < $now) {
+                $stmt = $db_connection->prepare("DELETE FROM password_reset_requests WHERE token = :token");
+                $stmt->execute([":token" => $token_hash]);
                 return new Error(message: "
                     Password reset token has expired. 
-                    Please <a href=\"/log-in\">try again</a>.
+                    Please <a href=\"/login\">try again</a>.
                 ");
             }
 
@@ -362,7 +386,7 @@
             if (!$user) {
                 return new Error(message: "
                     No found user associated with this reset token. 
-                    Please <a href=\"/log-in\">try again</a>.
+                    Please <a href=\"/login\">try again</a>.
                 ");
             }
 

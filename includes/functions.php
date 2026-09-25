@@ -14,6 +14,112 @@
     }
 
     /**
+     * Bootstraps a request. Call at the top of every entry point (index.php and each endpoint)
+     * so they all share the same error display, security headers and session settings
+     * @return void
+     */
+    function init_app(): void {
+        // Never leak stack traces, file paths or DB errors outside of development
+        ini_set("display_errors", is_dev() ? "1" : "0");
+
+        send_security_headers();
+        start_session();
+    }
+
+    /**
+     * Send baseline security headers
+     * @return void
+     */
+    function send_security_headers(): void {
+        if (headers_sent()) {
+            return;
+        }
+        header("X-Content-Type-Options: nosniff");
+        header("X-Frame-Options: DENY");
+        header("Content-Security-Policy: frame-ancestors 'none'");
+        // Keeps password reset tokens in the URL from leaking to other sites via the Referer header
+        header("Referrer-Policy: same-origin");
+    }
+
+    /**
+     * Start the session with hardened cookie settings
+     * @return void
+     */
+    function start_session(): void {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            return;
+        }
+        // Reject session ids that weren't issued by the server (prevents session fixation)
+        ini_set("session.use_strict_mode", "1");
+        session_set_cookie_params([
+            // Allow plain http only for local development
+            "secure"   => !is_dev() || !empty($_SERVER["HTTPS"]),
+            "httponly" => true,
+            "samesite" => "Strict"
+        ]);
+        session_start();
+    }
+
+    /**
+     * Escape a value for safe output in HTML text or attributes
+     * @param value - The value to escape
+     * @return string
+     */
+    function esc(mixed $value): string {
+        return htmlspecialchars((string) ($value ?? ""), ENT_QUOTES | ENT_SUBSTITUTE, "UTF-8");
+    }
+
+    /**
+     * Send a JSON response in the standard endpoint format and end the request
+     * @param status - HTTP status code, also mirrored in the response body
+     * @param message - Response message
+     * @param data - Optional data, e.g. error_field and error_message
+     * @return never
+     */
+    function json_response(int $status, string $message, array $data = []): never {
+        if (!headers_sent()) {
+            http_response_code($status);
+            header("Content-Type: application/json");
+        }
+        $body = ["status" => $status, "message" => $message];
+        if (!empty($data)) {
+            $body["data"] = $data;
+        }
+        echo(json_encode($body));
+        exit();
+    }
+
+    /**
+     * Guard for state-changing endpoints. Only allows POST requests from this site's own origin
+     * @return void
+     */
+    function require_same_origin_post(): void {
+        if (($_SERVER["REQUEST_METHOD"] ?? "") !== "POST") {
+            json_response(405, "Method not allowed", [
+                "error_message" => "Method not allowed"
+            ]);
+        }
+        if (!is_http_same_site_origin()) {
+            json_response(403, "Forbidden", [
+                "error_message" => "Sorry, something went wrong. Please try again later"
+            ]);
+        }
+    }
+
+    /**
+     * Respond to an unexpected error without leaking internal details
+     * @param error - The caught error/exception
+     * @return never
+     */
+    function json_server_error(Throwable $error): never {
+        debug_log($error->getMessage());
+        json_response(500, "Server error", [
+            "error_field" => null,
+            "error_message" => "Sorry, something went wrong. Please try again later"
+        ]);
+    }
+
+    /**
      * Checks an HTTP request comes from the current domain.
      */
     function is_http_same_site_origin(): bool {
@@ -101,7 +207,8 @@
         if (!$db_connection instanceof PDO) {
             return false;
         }
-        $stmt = $db_connection->query("SHOW TABLES LIKE '{$table_name}'");
+        $stmt = $db_connection->prepare("SHOW TABLES LIKE ?");
+        $stmt->execute([$table_name]);
         return $stmt->rowCount() > 0;
     }
 
@@ -219,60 +326,52 @@
 
     /**
      * Upload image to uploads directory at /public/images/uploads.
-     * Expects submitted form data for a file input captured in the $_FILES global
+     * Expects submitted form data for a file input captured in the $_FILES global.
+     * The file type is detected from the file contents (never the client supplied name or MIME type)
+     * and the file is stored under a random name so it can't overwrite or be guessed.
      * @param filename - the file input name to search in submission data
      * @return string/Error - returns the relative file path to the image on successful upload or an Error on failure
      */
     function upload_image(string $filename) {
         // Check submitted image
-        if (!isset($_FILES[$filename]["name"])) {
+        $file = $_FILES[$filename] ?? null;
+        if (
+            !is_array($file) ||
+            ($file["error"] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK ||
+            !is_uploaded_file($file["tmp_name"] ?? "")
+        ) {
             return new Error("Submitted file not found");
         }
 
-        $target_dir = "/public/images/uploads/";
-        $relative_path = filter_var($target_dir . basename($_FILES[$filename]["name"]), FILTER_SANITIZE_URL); 
-        $target_file = realpath($_SERVER["DOCUMENT_ROOT"]) . "/" . $relative_path;
-        
-        // Check file type is allowed
-        $file_ext = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-        $allowed_file_types = ["jpg", "jpeg", "png", "webp", "gif"];
-        if (!in_array($file_ext, $allowed_file_types)) {
-            return new Error("File type not allowed");
-        }
-
-        // Check if file with same name exists
-        if (file_exists($target_file)) {
-
-            // Remove extension from file path to expose name only
-            $file_parts = explode(".", $target_file);
-            array_pop($file_parts);
-            $file_name_without_ext = implode(".", $file_parts);
-
-            // Append count to end of file name and re-check until file name is unique
-            $file_append_count = 1;
-            while(file_exists("{$file_name_without_ext}-{$file_append_count}.{$file_ext}")) {
-                $file_append_count++;
-
-                // Add break condition to prevent possible infinite loop
-                if ($file_append_count >= 100) {
-                    return new Error("Unable to upload image");
-                }
-            }
-            // Update target file path and relative path as return value
-            $file_name_updated = "{$file_name_without_ext}-{$file_append_count}.{$file_ext}";
-            $target_file = $file_name_updated;
-            $relative_path = filter_var($target_dir . basename($file_name_updated), FILTER_SANITIZE_URL); 
-        }
-
         // Limit file size (5MB)
-        $image_size = $_FILES[$filename]["size"] ?? null;
+        $image_size = $file["size"] ?? null;
         if (!is_numeric($image_size) || $image_size > 5e+6) {
             return new Error("File size too large");
         }
 
-        // Attempt to copy image file to uploads return relative path on success
-        if (move_uploaded_file($_FILES[$filename]["tmp_name"], $target_file)) {
-            return $relative_path;
+        // Check file type is allowed by inspecting the actual file contents
+        $allowed_types = [
+            "image/jpeg" => "jpg",
+            "image/png"  => "png",
+            "image/webp" => "webp",
+            "image/gif"  => "gif"
+        ];
+        $mime_type = (new finfo(FILEINFO_MIME_TYPE))->file($file["tmp_name"]);
+        if (!isset($allowed_types[$mime_type]) || getimagesize($file["tmp_name"]) === false) {
+            return new Error("File type not allowed");
+        }
+
+        // Ensure uploads directory exists
+        $target_dir = "/public/images/uploads/";
+        $absolute_dir = realpath($_SERVER["DOCUMENT_ROOT"]) . $target_dir;
+        if (!is_dir($absolute_dir) && !mkdir($absolute_dir, 0755, true)) {
+            return new Error("Unable to upload image");
+        }
+
+        // Attempt to copy image file to uploads under a random name, return relative path on success
+        $new_file_name = bin2hex(random_bytes(16)) . ".{$allowed_types[$mime_type]}";
+        if (move_uploaded_file($file["tmp_name"], $absolute_dir . $new_file_name)) {
+            return $target_dir . $new_file_name;
         }
         return new Error("Unable to upload image");
     }

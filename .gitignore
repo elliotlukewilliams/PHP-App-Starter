@@ -1,4 +1,4 @@
-# Logs
+# Logs (includes debug.log written by debug_log())
 logs
 *.log
 npm-debug.log*
@@ -7,18 +7,36 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies (npm install / composer install)
 node_modules
+vendor
+
+# Build output (npm run build)
 dist
 dist-ssr
+
+# Environment (copy .env.example to .env)
+.env
+.env.*
+!.env.example
 *.local
+
+# User uploads
+public/images/uploads/*
+!public/images/uploads/.htaccess
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# OS files (incl. Windows metadata created when copying files into WSL)
+.DS_Store
+Thumbs.db
+desktop.ini
+*:Zone.Identifier

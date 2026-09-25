@@ -37,7 +37,7 @@
                             <?php echo(get_svg_icon("user")); ?>
                         </span>
                     <?php else : ?>
-                        <img src="<?php echo($current_user["image_url"]); ?>" class="profile-image-preview size-full object-cover object-center">
+                        <img src="<?php echo(esc($current_user["image_url"])); ?>" class="profile-image-preview size-full object-cover object-center">
                     <?php endif; ?>
                 </figure>
             </div>
