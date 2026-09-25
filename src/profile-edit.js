@@ -13,8 +13,8 @@ let OLD_PROFILE_UPDATE_FORM_DATA =
     new FormData(PROFILE_UPDATE_FORM_ELEMENT) :
     null
 
-// Track if profile image ha sbeen updated
-let PROFILE_IMAGE_UDATED = false
+// Track if profile image has been updated
+let PROFILE_IMAGE_UPDATED = false
 
 // Open or close the profile image edit panel when clicking on the profile image trigger
 const toggleProfileImageEditPanel = () => {
@@ -79,13 +79,13 @@ const displayPreviewProfileImageUpdate = () => {
     if (!file) return
 
     // Check file size. If too large, reset field value and show error
-    if (file.size > 3000000) {
-        showErrorMessage('File size too large. Profile images must be no larger than 3MB')
-        PROFILE_IMAGE_EDIT_INPUT_FIELD.value = OLD_PROFILE_UPDATE_FORM_DATA.get('image_url')
+    if (file.size > 5000000) {
+        showErrorMessage('File size too large. Profile images must be no larger than 5MB')
+        PROFILE_IMAGE_EDIT_INPUT_FIELD.value = ''
         return
     }
 
-    PROFILE_IMAGE_UDATED = true
+    PROFILE_IMAGE_UPDATED = true
 
     // Check/create image preview in DOM and apply source from reader
     const reader = new FileReader()
@@ -121,20 +121,24 @@ const removeProfileImage = () => {
     const originalProfileImage = document.querySelector('.profile-image-preview')
 
     // Remove new image preview and restore old one or remove original for option to have no profile image
-    if (newProfileImagePreview && originalProfileImage) {
+    if (newProfileImagePreview) {
         newProfileImagePreview.remove()
-        originalProfileImage.classList.remove('hidden')
+        originalProfileImage?.classList.remove('hidden')
+        if (imageFileInputElement) {
+            imageFileInputElement.value = ''
+        }
+        PROFILE_IMAGE_UPDATED = false
     } else if (originalProfileImage && imageFileInputElement) {
         originalProfileImage.classList.add('hidden')
         imageFileInputElement.value = ''
-        PROFILE_IMAGE_UDATED = true
+        PROFILE_IMAGE_UPDATED = true
     }
     
     // Close profile image edit panel
     toggleProfileImageEditPanel()
 }
 
-// Reset for and element states
+// Reset form and element states
 const resetProfileEditForm = (event) => {
     // Close profile image edit panel when modal is closed
     const modalParentElement = PROFILE_IMAGE_EDIT_TOGGLE.closest('.modal')
@@ -158,14 +162,15 @@ const resetProfileEditForm = (event) => {
     }
 
     // Revert profile image update
-    const originalProileImagePreview = modalParentElement.querySelector('.profile-image-preview')
-    if (originalProileImagePreview && originalProileImagePreview.classList.contains('hidden')) {
-        originalProileImagePreview.classList.remove('hidden')
+    const originalProfileImagePreview = modalParentElement.querySelector('.profile-image-preview')
+    if (originalProfileImagePreview && originalProfileImagePreview.classList.contains('hidden')) {
+        originalProfileImagePreview.classList.remove('hidden')
     }
     const newProfileImagePreview = modalParentElement.querySelector('.new-profile-image-preview')
     if (newProfileImagePreview) {
         newProfileImagePreview.remove()
     }
+    PROFILE_IMAGE_UPDATED = false
 
     // Clear errors
     clearErrors()
@@ -173,30 +178,27 @@ const resetProfileEditForm = (event) => {
 
 // Submit profile edit
 const submitProfileEdit = async () => {
-    // Prepare two sets of form data to be forked and later compared
+    // Build a filtered copy of the form data containing only changed fields
     const submittedFormData = new FormData(PROFILE_UPDATE_FORM_ELEMENT)
-    const filteredFormData = submittedFormData
+    const filteredFormData = new FormData()
     try {
         toggleLoadingState();
         clearErrors()
 
-        // Filter out data that hasn't changed to minimise payload
-        for (const pair of submittedFormData.entries()) {
-            const fieldKey = pair[0]
-            const fieldValue = pair[1]
-            if (fieldValue === OLD_PROFILE_UPDATE_FORM_DATA.get(fieldKey)) {
-                filteredFormData.delete(fieldKey)
+        // Filter out data that hasn't changed to minimise payload. Only include the image file if updated
+        for (const [fieldKey, fieldValue] of submittedFormData.entries()) {
+            if (fieldKey === 'image_file') {
+                if (PROFILE_IMAGE_UPDATED) {
+                    filteredFormData.append(fieldKey, fieldValue)
+                }
+            } else if (fieldValue !== OLD_PROFILE_UPDATE_FORM_DATA.get(fieldKey)) {
+                filteredFormData.append(fieldKey, fieldValue)
             }
-        }
-        
-        // Also remove image file from payload if not updated
-        if (!PROFILE_IMAGE_UDATED) {
-            filteredFormData.delete('image_file')
         }
 
         // If no changed fields, show notice and exit
         const allUpdatedTextFields = Array.from(filteredFormData.keys()).filter((key) => key !== 'image_file')
-        if (allUpdatedTextFields.length === 0 && !PROFILE_IMAGE_UDATED) {
+        if (allUpdatedTextFields.length === 0 && !PROFILE_IMAGE_UPDATED) {
             showErrorMessage('No fields have been updated')
             return
         }
@@ -220,7 +222,7 @@ const submitProfileEdit = async () => {
         localStorage.setItem('profileUpdated', true)
         
         // Reload page
-        window.location.reload('/')
+        window.location.reload()
     } catch (error) {
         console.error(error)
     } finally {

@@ -89,6 +89,7 @@ const processLogout = async (formElement) => {
             if (errorMessage) {
                 const errorOutput = formElement.querySelector('output.logout-error')
                 if (errorOutput) {
+                    errorOutput.classList.add('active')
                     errorOutput.innerHTML = errorMessage
                 }
             }

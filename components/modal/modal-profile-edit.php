@@ -18,7 +18,7 @@
         "created_at" => ""
     ], $current_user);
 
-    // Repetetive classes
+    // Repetitive classes
     $label_class = "flex flex-col gap-2 py-2 px-1 border-b border-blue-900/50 mb-6";
     $label_span_class = "font-semibold text-lg";
     $value_class = "profile-edit-field";
@@ -48,7 +48,7 @@
                         name="image_file"
                         id="profile-edit-image" 
                         type="file" 
-                        accept="image/png, image/jpeg" 
+                        accept="image/png, image/jpeg, image/webp, image/gif" 
                         class="absolute inset-0 z-10 opacity-0"
                     >
                 </div>

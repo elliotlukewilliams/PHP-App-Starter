@@ -1,13 +1,13 @@
 <?php
-    // Check logged in status of current user. Redirect if not logged in.
+    // Check logged in status of current user. Redirect to account if already logged in.
     if (get_logged_in_user()) {
         header("Location: /account");
         exit();
     }
 
     get_component(path: "global/header", args: [
-        "title" => "My PHP App | Home",
-        "meta_description" => "Welcome to the PHP-Docker-Starter template."
+        "title" => "My PHP App | Sign up",
+        "meta_description" => "Create an account"
     ]);
 ?>
 

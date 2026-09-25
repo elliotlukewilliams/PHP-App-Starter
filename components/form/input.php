@@ -24,6 +24,7 @@
     $max = $args["max"];
     $validation_error_message = $args["validation_error_message"];
     $html_tag = $args["textarea"] ? "textarea" : "input";
+    $description_id = "{$id}-description";
 ?>
 <label class="[&>input:has(+output.active:not(.success))]:!border-red">
     <?php echo($label); ?>
@@ -46,9 +47,14 @@
             required
         <?php 
             endif;
-            if ($value) :
+            if ($value && $html_tag !== "textarea") :
         ?>
             value="<?php echo(esc($value)); ?>"
+        <?php 
+            endif;
+            if ($description) :
+        ?>
+            aria-describedby="<?php echo(esc($description_id)); ?>"
         <?php 
             endif;
         ?>
@@ -65,7 +71,7 @@
         if ($description) :
     ?>
         <span 
-            aria-describes="<?php echo(esc($id)); ?>" 
+            id="<?php echo(esc($description_id)); ?>" 
             class="description text-sm text-gray-600 max-h-0 overflow-hidden peer-focus:max-h-screen transition-all duration-400 delay-300 ease-in-out"
         >
             <?php echo($description); ?>

@@ -8,8 +8,8 @@
 
     // Get header
     get_component(path: "global/header", args: [
-        "title" => "My PHP App | Home",
-        "meta_description" => "Welcome to the PHP-Docker-Starter template."
+        "title" => "My PHP App | Account",
+        "meta_description" => "View and edit your profile"
     ]);
 
     // Merge expected keys
@@ -22,7 +22,7 @@
         "created_at" => ""
     ], $current_user);
 
-    // Repetetive classes
+    // Repetitive classes
     $label_class = "flex items-center justify-between py-2 px-1 border-b border-blue-900/50 mb-6";
     $label_span_class = "font-semibold text-lg";
     $value_class = "profile-edit-field ml-4 text-right placeholder:text-blue-950/70 outline-0";

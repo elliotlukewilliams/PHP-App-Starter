@@ -43,7 +43,7 @@ const modalTriggerButtons = document.querySelectorAll('[data-modal-trigger]')
 if (modalTriggerButtons) {
     modalTriggerButtons.forEach(button => {
         button.addEventListener('click', (event) => {
-            const modalId = event.target.dataset.modalTrigger
+            const modalId = event.currentTarget.dataset.modalTrigger
             if (modalId) {
                 openModal(modalId)
             }
@@ -51,7 +51,7 @@ if (modalTriggerButtons) {
     })
 }
 
-// Custom event listener to close modal programatically
+// Custom event listener to close modal programmatically
 window.addEventListener('closeModal', (event) => {
     const { modalId } = event.detail || {}
     closeModal(modalId)

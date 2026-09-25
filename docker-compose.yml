@@ -3,7 +3,6 @@ services:
     build: .
     ports:
       - "${APP_PORT}:80" # Apache/PHP
-      - ${VITE_DEV_PORT} # Vite dev server
     volumes:
       - .:/var/www/html
     depends_on:

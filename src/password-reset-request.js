@@ -91,7 +91,7 @@ const sendPasswordResetRequest = async (event) => {
         } else {
             formElement.reset()
 
-            // Dispatch event for modal.js to close programatically
+            // Dispatch event for modal.js to close programmatically
             const modal = formElement.closest('.modal')
             if (modal?.id) {
                 window.dispatchEvent(

@@ -28,17 +28,17 @@
                     <p>
                         Download and install Docker on your machine.
                         This will enable you to run the project on a local server.
-                        If running on Windows it is rcommened to run the project from 
+                        If running on Windows it is recommended to run the project from 
                         WSL.
                     </p>
                 </div>
                 <div>
                     <h3 class="text-lg mb-4">Start App</h3>
                     <p>
-                        Simply run <code>docker-compose up</code>
-                        and all the project dependancies will be installed locally.
-                        Then, in se separete terminalm run <code>npm run dev</code>
-                        to spin up the front-end assets. 
+                        Simply run <code>./start-app.sh</code> to start the containers,
+                        install the project dependencies and run the database migrations.
+                        Then, in a separate terminal, run <code>npm install</code> and
+                        <code>npm run dev</code> to spin up the front-end assets.
                     </p>
                 </div>
                 <div>

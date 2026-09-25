@@ -1,6 +1,6 @@
 <?php
-    // Get ulility functions
-    require_once(realpath($_SERVER["DOCUMENT_ROOT"]) . "/includes/functions.php");
+    // Get utility functions
+    require_once(__DIR__ . "/../functions.php");
 
     init_app();
     require_same_origin_post();

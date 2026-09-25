@@ -1,5 +1,5 @@
 <form id="signup-form" data-component="signup" class="p-6 rounded-md border border-gray-100 shadow-md max-w-sm mx-auto bg-white">
-    <h3 class="text-3xl font-bold text-center mb-4 border-b border-slate-400 pb-6">Sign up</h3>
+    <h1 class="text-3xl font-bold text-center mb-4 border-b border-slate-400 pb-6">Sign up</h1>
     <div class="flex flex-col gap-6">
         <?php
             // Email
@@ -19,7 +19,7 @@
                 "label" => "Password",
                 "description" => "
                     Passwords must be at least 8 characters long and 
-                    contain at least 1 uppercase character, 1 lowercase character and  1 number
+                    contain at least 1 uppercase character, 1 lowercase character and 1 number
                 ",
                 "placeholder" => "Think of a strong password",
                 "required" => true,

@@ -17,7 +17,7 @@
                     "label" => "New Password",
                     "description" => "
                         Passwords must be at least 8 characters long and 
-                        contain at least 1 uppercase character, 1 lowercase character and  1 number
+                        contain at least 1 uppercase character, 1 lowercase character and 1 number
                     ",
                     "placeholder" => "Enter password...",
                     "required" => true,

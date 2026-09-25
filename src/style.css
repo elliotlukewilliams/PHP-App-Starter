@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Poppins (self-hosted via @fontsource). Only the weights used: normal, medium, semibold, bold */
+@import "@fontsource/poppins/400.css";
+@import "@fontsource/poppins/500.css";
+@import "@fontsource/poppins/600.css";
+@import "@fontsource/poppins/700.css";
+
 @theme {
     --color-*: initial;
 
@@ -92,7 +98,7 @@
     text-decoration: underline;
     text-underline-offset: 0.25rem;
     transition-property: color;
-    transition-duration: 200;
+    transition-duration: 200ms;
 
     @variant hover {
         color: var(--color-blue-500);

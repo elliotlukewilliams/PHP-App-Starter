@@ -11,7 +11,7 @@
     // If modal template not found, fetch example template
     $modal_template = $args["modal_template"];
     $modal_template_path = "modal/modal-{$modal_template}";
-    if (!file_exists(realpath($_SERVER["DOCUMENT_ROOT"]) . "/components/{$modal_template_path}.php")) {
+    if (!file_exists(APP_ROOT . "/components/{$modal_template_path}.php")) {
         $modal_template_path = "modal/modal-example";
     }
 

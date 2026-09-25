@@ -1,6 +1,6 @@
 <?php
-    // Get ulility functions
-    require_once(realpath($_SERVER["DOCUMENT_ROOT"]) . "/includes/functions.php");
+    // Get utility functions
+    require_once(__DIR__ . "/../functions.php");
 
     class User {
 
@@ -20,8 +20,8 @@
         public bool $is_logged_in = false;
 
         /**
-         * Utility function to validate a password. Regex patter kep here as a source of truth to validate against
-         * @param password - pssword to validate
+         * Utility function to validate a password. Regex pattern kept here as a source of truth to validate against
+         * @param password - password to validate
          * @return boolean
          */
         public function validate_password(string $password) {
@@ -30,7 +30,7 @@
 
         /**
          * Create a new user in the database
-         * @return this/Error - Returns own instance with updated propterties on success, Error on failtue
+         * @return this/Error - Returns own instance with updated properties on success, Error on failure
          */
         public function create(string $email, string $password) {
             /* Get/check db connection */
@@ -52,7 +52,7 @@
             /* Hash password */
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
             if (empty($password_hash)) {
-                return new Error(message: "Password encryption failed", code: 2);
+                return new Error(message: "Password hashing failed", code: 2);
             }
     
             /* Check if user already exists in database */
@@ -75,6 +75,7 @@
 
             // Update properties of current instance and return self as new user
             if ($user_created) {
+                $this->id = (int) $db_connection->lastInsertId();
                 $this->email = $email;
                 $this->created_at = $created_at;
                 return $this;
@@ -125,8 +126,8 @@
         }
 
         /**
-         * Updates a user by a specific field of a specific value
-         * @param email - the user to be updated
+         * Updates the given fields for a user
+         * @param email - email address of the user to be updated
          * @param fields - associative array with key/value pairs for field name and value
          * @return Bool - True on successful update, false on failure
          */
@@ -169,14 +170,7 @@
                 // Prepare and execute
                 $sql = "UPDATE users SET {$set_str} WHERE email = :email";
                 $stmt = $db_connection->prepare($sql);
-                $stmt->execute($params);
-
-                // Check row count
-                if ($stmt->rowCount() < 1) {
-                    return false;
-                }
-
-                return true;
+                return $stmt->execute($params);
             } catch(Exception $error) {
                 debug_log($error->getMessage());
                 return false;
@@ -186,7 +180,7 @@
         /**
          * Delete user in database
          * @param user_email_or_id
-         * @return bool - True on successful deletion or false on failue
+         * @return bool - True on successful deletion or false on failure
          */
         public function delete(string | int $user_email_or_id) {
             /* Get/check db connection */
@@ -200,7 +194,7 @@
             // Prepare statement
             $stmt = $db_connection->prepare($sql);
     
-            // Fetch from db
+            // Delete from db
             return $stmt->execute([":{$field}" => $user_email_or_id]);
         }
 
@@ -208,7 +202,7 @@
          * Set session login for an existing user
          * @param email - Any valid email address to reference existing user by
          * @param password - The un-hashed user password
-         * @return this/Error - Returns updates user object on success, false on failure
+         * @return this/Error - Returns updated user object on success, Error on failure
          */
         public function login(string $email, string $password) {
             // Check if user exists in database and the password matches. Use the same error for both
@@ -219,9 +213,9 @@
                 return new Error(message: "Incorrect email or password");
             }
 
-            // Excplicitly check array keys for important info
+            // Explicitly check array keys for important info
             if (empty($searched_user["id"])) {
-                return new Error(message: "Error: Unexpected result returned fron database");
+                return new Error(message: "Error: Unexpected result returned from database");
             }
 
             // Merge expected keys in user for additional info
@@ -245,6 +239,7 @@
                 $this->last_name = $searched_user["last_name"];
                 $this->bio = $searched_user["bio"];
                 $this->image_url = $searched_user["image_url"];
+                $this->created_at = (int) ($searched_user["created_at"] ?? -1);
 
                 // Set session current user
                 $_SESSION["current_user_id"] = $this->id;
@@ -260,7 +255,7 @@
         /**
          * Send a password reset token to an existing user via email
          * @param email - Email address of existing user
-         * @return true|Error - Returns true if email sent successfully or Error object on failure
+         * @return true|Error - Returns true if email sent successfully (or no account exists), false or Error on failure
          */
         public function send_password_reset(string $email) {            
             /* Get/check db connection */
@@ -301,12 +296,12 @@
             ";
             // Execute actual user email on prepared statement
             $stmt = $db_connection->prepare($sql);
-            $password_Reset_request_created = $stmt->execute([
+            $password_reset_request_created = $stmt->execute([
                 ":email"      => $email,
                 ":token"      => $token_hash,
                 ":created_at" => $created_at
             ]);
-            if (!$password_Reset_request_created) {
+            if (!$password_reset_request_created) {
                 return new Error("Unable to create reset request", 500);
             }
             
@@ -314,7 +309,7 @@
             $subject = "Reset your password";
             $to = $email;
             // Build from the configured origin, never the request Host header which an attacker can spoof
-            $origin = rtrim(getenv("APP_ORIGIN"), "/");
+            $origin = rtrim(env("APP_ORIGIN", ""), "/");
             if (empty($origin)) {
                 return new Error("APP_ORIGIN is not configured", 500);
             }
@@ -330,7 +325,7 @@
         }
 
         /**
-         * Resets a users password by referencing a unique token
+         * Resets a user's password by referencing a unique token
          * @param token - The unique token that was sent to the user via email
          * @param password - The new password to replace the forgotten one
          * @return true|Error - Returns true on success or Error object on failure
@@ -355,7 +350,7 @@
             $found_row = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$found_row) {
                 return new Error(message: "
-                    This password reset token has already been used. 
+                    This password reset link is invalid or has already been used. 
                     Please <a href=\"/login\">try again</a>.
                 ");
             }
@@ -375,7 +370,7 @@
                 $stmt = $db_connection->prepare("DELETE FROM password_reset_requests WHERE token = :token");
                 $stmt->execute([":token" => $token_hash]);
                 return new Error(message: "
-                    Password reset token has expired. 
+                    This password reset link has expired. 
                     Please <a href=\"/login\">try again</a>.
                 ");
             }
@@ -385,7 +380,7 @@
             $user = $this->get($found_row["email"]);
             if (!$user) {
                 return new Error(message: "
-                    No found user associated with this reset token. 
+                    No user found for this password reset link. 
                     Please <a href=\"/login\">try again</a>.
                 ");
             }
@@ -401,10 +396,10 @@
             /* Hash password */
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
             if (empty($password_hash)) {
-                return new Error(message: "Password encryption failed");
+                return new Error(message: "Password hashing failed");
             }
 
-            // Udate user password
+            // Update user password
             return $this->update($user_email, ["password" => $password_hash]);
         }
     }

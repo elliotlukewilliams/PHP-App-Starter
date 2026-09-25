@@ -1,16 +1,33 @@
 <?php
+    // Project root directory.
+    if (!defined("APP_ROOT")) {
+        define("APP_ROOT", dirname(__DIR__));
+    }
+
     // Includes
-    require_once(realpath($_SERVER["DOCUMENT_ROOT"]) . "/includes/classes/class-user.php");
+    require_once(APP_ROOT . "/includes/classes/class-user.php");
 
     // Namespace
     use PHPMailer\PHPMailer\PHPMailer;
     
     /**
+     * Get an environment variable. Checks $_ENV and $_SERVER (populated by Dotenv) as well as
+     * getenv() (populated by Docker) so values are found however they were loaded
+     * @param key - The environment variable name
+     * @param default - Returned if the variable isn't set
+     * @return string|null
+     */
+    function env(string $key, ?string $default = null): ?string {
+        $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+        return ($value === false || $value === null) ? $default : (string) $value;
+    }
+
+    /**
      * Check if current environment is development
      * @return boolean
      */
     function is_dev() {
-        return getenv("APP_ENV") === "local";
+        return env("APP_ENV") === "local";
     }
 
     /**
@@ -123,7 +140,7 @@
      * Checks an HTTP request comes from the current domain.
      */
     function is_http_same_site_origin(): bool {
-        $allowed_origin = getenv("APP_ORIGIN");
+        $allowed_origin = env("APP_ORIGIN");
 
         // Fail closed if not configured
         if (empty($allowed_origin)) {
@@ -174,11 +191,12 @@
         }
 
         // Get credentials from ENV and connect
-        $host = $_ENV["DB_HOST"] ?? "";
-        $db_name = $_ENV["DB_NAME"] ?? "";
-        $user = $_ENV["DB_USER"] ?? "";
-        $password = $_ENV["DB_PASSWORD"] ?? "";
-        $dsn = "mysql:host={$host};dbname={$db_name};charset=utf8mb4";
+        $host = env("DB_HOST", "");
+        $port = env("DB_PORT", "3306");
+        $db_name = env("DB_NAME", "");
+        $user = env("DB_USER", "");
+        $password = env("DB_PASSWORD", "");
+        $dsn = "mysql:host={$host};port={$port};dbname={$db_name};charset=utf8mb4";
         
         try {
             $db_connection = new PDO($dsn, $user, $password);
@@ -188,13 +206,15 @@
     }
 
     /**
-     * 
+     * Gets the database connection, connecting first if needed
+     * @return PDO
      */
-    function get_db_connection() {
+    function get_db_connection(): PDO {
         global $db_connection;
         if (!$db_connection instanceof PDO) {
             init_db();
         }
+        return $db_connection;
     }
 
     /**
@@ -236,18 +256,19 @@
     function get_component(string $path, array $args = []) {
         global $component_args;
         $component_args = $args;
-        $absolute_path = realpath($_SERVER["DOCUMENT_ROOT"]) . "/components/{$path}.php";
+        $absolute_path = APP_ROOT . "/components/{$path}.php";
         if (file_exists($absolute_path)) {
-            include("components/{$path}.php");
+            include($absolute_path);
         }
     }
 
     /**
-     * @param file_name - File name of the svg file in the icons folder
+     * Get the contents of an SVG icon so it can be output inline
+     * @param file_name - File name of the svg file in the icons folder (omit .svg)
      * @return string|false - The SVG file contents if found, false if not
      */
     function get_svg_icon(string $file_name) {
-        $file_path = realpath($_SERVER["DOCUMENT_ROOT"]) . "/public/images/icons/{$file_name}.svg";
+        $file_path = APP_ROOT . "/public/images/icons/{$file_name}.svg";
         if (file_exists($file_path)) {
             return file_get_contents($file_path);
         }
@@ -257,7 +278,7 @@
     /**
      * Set default components args by merging expected keys
      * @param args - the array of component specific arguments to set defaults for
-     * @return array - the merged defaults for the compoenent arguments
+     * @return array - the merged defaults for the component arguments
      */
     function parse_component_args(array $args = []) {
         global $component_args;
@@ -272,31 +293,31 @@
      * Send SMTP email with PHPMailer
      * @param subject - Email subject
      * @param to - recipient email address
-     * @param message - email massage
+     * @param message - email message (HTML)
      * @param from_address - email "from" address
-     * @return bool/Error
+     * @return bool|Error - True on success, false if not configured, Error on send failure
      */
     function send_email(string $subject, string $to, string $message, string $from_address = "") {
         // Include composer plugins for access to PHPMailer
-        require_once(realpath($_SERVER["DOCUMENT_ROOT"]) . "/vendor/autoload.php");
+        require_once(APP_ROOT . "/vendor/autoload.php");
 
-        // Get SMPT server credentials from ENV
-        $host =     getenv("SMTP_HOST");
-        $port =     getenv("SMTP_PORT");
-        $auth =     getenv("SMTP_AUTH") === "true" ? true : false;
-        $user =     getenv("SMTP_USER");
-        $password = getenv("SMTP_PASSWORD");
+        // Get SMTP server credentials from ENV
+        $host =     env("SMTP_HOST");
+        $port =     env("SMTP_PORT");
+        $auth =     env("SMTP_AUTH") === "true";
+        $user =     env("SMTP_USER");
+        $password = env("SMTP_PASSWORD");
 
-        // Check minimum credentials, if on localhost don't fail siliently
+        // Check minimum credentials, if on localhost don't fail silently
         if (empty($host) || empty($port)) {
             if (is_dev()) {
-                throw new Error("SMPT credentials missing. Unable to send mail.");
+                throw new Error("SMTP credentials missing. Unable to send mail.");
             }
             return false;
         }
         // Get from address from ENV if not set
         if (empty($from_address)) {
-            $from_address = getenv("SMTP_FROM_ADDRESS");
+            $from_address = env("SMTP_FROM_ADDRESS", "");
         }
 
         // Attempt mail send with PHPMailer
@@ -304,7 +325,7 @@
             $mail = new PHPMailer(true);
             $mail->isSMTP();
             $mail->Host       = $host;
-            $mail->Port       = $port;             
+            $mail->Port       = (int) $port;
             $mail->SMTPAuth   = $auth;
             if ($auth) {
                 $mail->Username   = $user;                     
@@ -320,7 +341,7 @@
             $mail->Timeout = 10; // seconds
             return $mail->send();
         } catch(Exception $error) {
-            return $error->getMessage();
+            return new Error($error->getMessage());
         }
     }
 
@@ -363,7 +384,7 @@
 
         // Ensure uploads directory exists
         $target_dir = "/public/images/uploads/";
-        $absolute_dir = realpath($_SERVER["DOCUMENT_ROOT"]) . $target_dir;
+        $absolute_dir = APP_ROOT . $target_dir;
         if (!is_dir($absolute_dir) && !mkdir($absolute_dir, 0755, true)) {
             return new Error("Unable to upload image");
         }
@@ -386,9 +407,9 @@
         if (!is_dev()) {
             return;
         }
-        $time = date("d/m/Y h:i:s");
+        $time = date("d/m/Y H:i:s");
         file_put_contents(
-            realpath($_SERVER["DOCUMENT_ROOT"]) . "/debug.log",
+            APP_ROOT . "/debug.log",
             "{$time}: {$message}" . PHP_EOL,
             FILE_APPEND
         );

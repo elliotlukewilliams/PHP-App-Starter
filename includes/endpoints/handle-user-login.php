@@ -1,6 +1,6 @@
 <?php
     // Include User class
-    require_once(realpath($_SERVER["DOCUMENT_ROOT"]) . "/includes/classes/class-user.php");
+    require_once(__DIR__ . "/../classes/class-user.php");
 
     init_app();
     require_same_origin_post();

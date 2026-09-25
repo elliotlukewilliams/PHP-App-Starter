@@ -2,7 +2,7 @@
     // Set args
     $args = parse_component_args([
         "id" => uniqid("toast-"),
-        "message" => "", // Leave empty if populating dynmically via JS
+        "message" => "", // Leave empty if populating dynamically via JS
         "icon" => "alert-circle",
         "position" => "bottom-right",
         "type" => "notice"
@@ -26,15 +26,17 @@
     $border_class = match($type) {
         "notice" => "border-blue-500",
         "success" => "border-green",
-        "warning" => "border-red"
+        "warning" => "border-red",
+        default => "border-blue-500"
     };
     $icon_class = match($type) {
         "notice" => "text-blue-500",
         "success" => "text-green",
-        "warning" => "text-red"
+        "warning" => "text-red",
+        default => "text-blue-500"
     };
     $toast_class = "{$position_class} {$border_class}";
-    $aria_live = $type = "warning" ? "assertive" : "polite";
+    $aria_live = $type === "warning" ? "assertive" : "polite";
 ?>
 <div
     id="<?php echo($id); ?>"
@@ -50,10 +52,10 @@
                 <?php echo($icon_svg); ?>
             </span>
         <?php endif; ?>
-        <p class="toast-text"><?php echo($message); ?></p>
+        <p class="toast-text"><?php echo(esc($message)); ?></p>
     </div>
     <button
-        aria-label="Dismiss notifiction" 
+        aria-label="Dismiss notification" 
         class="toast-dismiss block size-4 shrink-0 cursor-pointer hover:opacity-50 transition-opacity duration-200"
     >
         <?php echo(get_svg_icon("x")); ?>
