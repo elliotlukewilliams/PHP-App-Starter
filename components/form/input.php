@@ -11,6 +11,7 @@
         "required" => false,
         "value" => null,
         "max" => 200,
+        "autocomplete" => "", // e.g. "email", "current-password", "new-password", "given-name"
         "validation_error_message" => false // Use empty string if dynamically populating
     ]);
     $name = $args["name"];
@@ -22,9 +23,20 @@
     $required = $args["required"];
     $value = $args["value"];
     $max = $args["max"];
+    $autocomplete = $args["autocomplete"];
     $validation_error_message = $args["validation_error_message"];
     $html_tag = $args["textarea"] ? "textarea" : "input";
     $description_id = "{$id}-description";
+    $error_id = "{$id}-error";
+
+    // Link the description and error message to the field so screen readers read them with it
+    $described_by = [];
+    if ($description) {
+        $described_by[] = $description_id;
+    }
+    if (is_string($validation_error_message)) {
+        $described_by[] = $error_id;
+    }
 ?>
 <label class="[&>input:has(+output.active:not(.success))]:!border-red">
     <?php echo($label); ?>
@@ -52,9 +64,14 @@
             value="<?php echo(esc($value)); ?>"
         <?php 
             endif;
-            if ($description) :
+            if ($autocomplete) :
         ?>
-            aria-describedby="<?php echo(esc($description_id)); ?>"
+            autocomplete="<?php echo(esc($autocomplete)); ?>"
+        <?php 
+            endif;
+            if (!empty($described_by)) :
+        ?>
+            aria-describedby="<?php echo(esc(implode(" ", $described_by))); ?>"
         <?php 
             endif;
         ?>
@@ -63,7 +80,7 @@
     <?php
         if (is_string($validation_error_message)) : 
     ?>
-        <output>
+        <output id="<?php echo(esc($error_id)); ?>" role="alert">
             <?php echo($validation_error_message); ?>
         </output>
     <?php 
@@ -72,7 +89,7 @@
     ?>
         <span 
             id="<?php echo(esc($description_id)); ?>" 
-            class="description text-sm text-gray-600 max-h-0 overflow-hidden peer-focus:max-h-screen transition-all duration-400 delay-300 ease-in-out"
+            class="description text-sm text-gray-700 max-h-0 overflow-hidden peer-focus:max-h-screen transition-all duration-400 delay-300 ease-in-out"
         >
             <?php echo($description); ?>
         </span>

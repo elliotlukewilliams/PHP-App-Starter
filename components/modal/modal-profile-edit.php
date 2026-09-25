@@ -30,31 +30,39 @@
 
         <!-- Profile Picture -->
         <div class="relative mx-auto flex items-center">
-            <div role="button" id="profile-image-edit-panel-toggle" class="hover:opacity-60 transition-all duration-200 transition-transform cursor-pointer">
-                <figure id="profile-picture" class="relative flex items-center justify-center size-32 overflow-hidden rounded-full border border-black/20">
+            <button 
+                type="button"
+                id="profile-image-edit-panel-toggle" 
+                aria-label="Change profile picture"
+                aria-expanded="false"
+                aria-controls="profile-image-edit-panel"
+                class="rounded-full hover:opacity-60 transition-all duration-200 transition-transform cursor-pointer"
+            >
+                <span id="profile-picture" class="relative flex items-center justify-center size-32 overflow-hidden rounded-full border border-black/20">
                     <?php if (!$current_user["image_url"]) : ?>
                         <span class="block size-12 text-blue-200">
                             <?php echo(get_svg_icon("user")); ?>
                         </span>
                     <?php else : ?>
-                        <img src="<?php echo(esc($current_user["image_url"])); ?>" class="profile-image-preview size-full object-cover object-center">
+                        <img src="<?php echo(esc($current_user["image_url"])); ?>" alt="Your current profile picture" class="profile-image-preview size-full object-cover object-center">
                     <?php endif; ?>
-                </figure>
-            </div>
-            <div id="profile-image-edit-panel" class="hidden animate-fade-in text-sm text-blue-600">
-                <div class="relative flex items-center gap-1 hover:underline transition-colors duration-200 mb-1.5">
+                </span>
+            </button>
+            <div id="profile-image-edit-panel" class="hidden animate-fade-in text-sm text-blue-700">
+                <div class="file-input-wrapper relative flex items-center gap-1 hover:underline transition-colors duration-200 mb-1.5">
                     Edit <span class="block shrink-0 size-3"><?php echo(get_svg_icon("edit")) ?></span>
                     <input
                         name="image_file"
                         id="profile-edit-image" 
                         type="file" 
+                        aria-label="Upload a new profile picture"
                         accept="image/png, image/jpeg, image/webp, image/gif" 
                         class="absolute inset-0 z-10 opacity-0"
                     >
                 </div>
-                <div id="remove-profile-image" role="button" class="relative flex items-center gap-1 cursor-pointer hover:underline transition-colors duration-200">
+                <button type="button" id="remove-profile-image" class="relative flex items-center gap-1 cursor-pointer hover:underline transition-colors duration-200">
                     Remove <span class="block shrink-0 size-3"><?php echo(get_svg_icon("trash")) ?></span>
-                </div>
+                </button>
             </div>
         </div>
         <?php
@@ -72,6 +80,7 @@
                 "type" => "text",
                 "label" => "First Name",
                 "value" => $current_user["first_name"],
+                "autocomplete" => "given-name",
                 "max" => 100,
                 "required" => true
             ]);
@@ -82,18 +91,19 @@
                 "type" => "text",
                 "label" => "Last Name",
                 "value" => $current_user["last_name"],
+                "autocomplete" => "family-name",
                 "max" => 100,
                 "required" => true
             ]);
         ?>
-        <output></output>
+        <output role="alert"></output>
         <div class="flex items-center gap-6">
             <button type="submit" class="button primary w-1/2">
                 Update
             </button>
-            <div role="button" class="close-modal button secondary w-1/2">
+            <button type="button" class="close-modal button secondary w-1/2">
                 Cancel
-            </div>
+            </button>
         </div>
 
         <!-- Loading overlay -->
@@ -105,6 +115,7 @@
             <span class="block size-8 animate-spin">
                 <?php echo(get_svg_icon("loader")); ?>
             </span>
+            <span class="sr-only">Saving</span>
         </div>
     </form>
 </div>

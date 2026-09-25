@@ -12,6 +12,7 @@
                     "type" => "email",
                     "label" => "Email",
                     "placeholder" => "Enter email address...",
+                    "autocomplete" => "email",
                     "required" => true,
                     "validation_error_message" => ""
                 ]);
@@ -22,11 +23,12 @@
                     "type" => "password",
                     "label" => "Password",
                     "placeholder" => "Enter password...",
+                    "autocomplete" => "current-password",
                     "required" => true,
                     "validation_error_message" => ""
                 ]);
             ?>
-            <output class="any-error"></output>
+            <output class="any-error" role="alert"></output>
             <button type="submit" class="button primary relative">
                 <span class="btn-text">Log in</span>
                 <?php
@@ -43,8 +45,10 @@
     </form>
     <div class="flex justify-center">
         <button 
+            type="button"
             data-modal-trigger="<?php echo($modal_id); ?>" 
-            class="text-blue-600 underline hover:text-blue-400 transition-colors duration-200 cursor-pointer"
+            aria-haspopup="dialog"
+            class="text-blue-700 underline hover:text-blue-900 transition-colors duration-200 cursor-pointer"
         >
             Forgot password?
         </button>

@@ -11,7 +11,7 @@
     ]);
 ?>
 
-<main class="bg-slate-50 min-h-screen">
+<main id="main" tabindex="-1" class="bg-slate-50 min-h-screen outline-none">
     <section class="py-32">
         <?php get_component(path: "password-reset"); ?>
     </section>

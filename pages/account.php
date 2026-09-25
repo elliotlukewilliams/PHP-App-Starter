@@ -30,7 +30,7 @@
     $modal_id = uniqid("modal-");
     $delete_modal_id = uniqid("modal-");
 ?>
-<main class="bg-slate-50 min-h-screen">
+<main id="main" tabindex="-1" class="bg-slate-50 min-h-screen outline-none">
     <section class="py-16">
         <div class="container">
             <div class="max-w-sm mx-auto">
@@ -45,7 +45,7 @@
                             <?php echo(get_svg_icon("user")); ?>
                         </span>
                     <?php else : ?>
-                        <img src="<?php echo(esc($current_user["image_url"])); ?>" class="size-full object-cover object-center">
+                        <img src="<?php echo(esc($current_user["image_url"])); ?>" alt="Your profile picture" class="size-full object-cover object-center">
                     <?php endif; ?>
                 </figure>
                 
@@ -75,20 +75,22 @@
                 <!-- Date Registered -->
                 <div class="<?php echo($label_class); ?>">
                     <span class="<?php echo($label_span_class); ?>">Date Registered</span>
-                    <time class="ml-4 text-right">
+                    <time datetime="<?php echo(date("Y-m-d", (int) $current_user["created_at"])); ?>" class="ml-4 text-right">
                         <?php echo(date("d/m/Y", (int) $current_user["created_at"])); ?>
                     </time>
                 </div>
                 
                 <!-- Edit Profile / Delete Account Buttons -->
                 <div class="flex flex-col items-center gap-4">
-                    <button data-modal-trigger="<?php echo($modal_id); ?>" class="button primary mx-auto">
+                    <button type="button" data-modal-trigger="<?php echo($modal_id); ?>" aria-haspopup="dialog" class="button primary mx-auto">
                         Edit profile
                         <span class="block size-4 pointer-events-none"><?php echo(get_svg_icon("edit")); ?></span>
                     </button>
                     <button 
+                        type="button"
                         data-modal-trigger="<?php echo($delete_modal_id); ?>" 
-                        class="text-blue-600 underline hover:text-blue-400 transition-colors duration-200 cursor-pointer"
+                        aria-haspopup="dialog"
+                        class="text-blue-700 underline hover:text-blue-900 transition-colors duration-200 cursor-pointer"
                     >
                         Delete account
                     </button>

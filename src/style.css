@@ -11,9 +11,9 @@
 
     --color-white: #ffffff;
     --color-black: #000000;
-    --color-red: #ff0000;
-    --color-green: #2e9000;
-
+    --color-red: #d40000;
+    --color-green: #267a00;
+    
     --color-blue-50: #f1f6fd;
     --color-blue-100: #dfeafa;
     --color-blue-200: #c6dbf7;
@@ -101,8 +101,13 @@
     transition-duration: 200ms;
 
     @variant hover {
-        color: var(--color-blue-500);
+        color: var(--color-blue-600);
     }
+}
+
+/* Keyboard focus indicator for the visually hidden profile image file input */
+.file-input-wrapper:has(input:focus-visible) {
+    @apply outline-2 outline-offset-2 outline-blue-600 rounded-sm;
 }
 
 /* Headings */
@@ -121,8 +126,8 @@ textarea:not(.form-unset textarea),
 select {
     @apply 
         block w-full p-3 border border-gray-950 rounded-sm
-        placeholder-gray-400
-        focus:outline-none focus:border-blue-500;
+        placeholder-gray-700
+        focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40;
 }
 label:not(.form-unset label) {
     @apply flex flex-col gap-1;

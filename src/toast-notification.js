@@ -3,11 +3,17 @@ const toggleToast = (visible, toastId, message = '') => {
     if (!toastElement) return
 
     const toastText = toastElement.querySelector('.toast-text')
-    if (toastText) {
-        toastText.innerHTML = visible ? message : ''
-    }
-
     toastElement.classList.toggle('hidden', !visible)
+
+    if (!toastText) return
+    if (!visible) {
+        toastText.innerHTML = ''
+        return
+    }
+    toastText.innerHTML = ''
+    setTimeout(() => {
+        toastText.innerHTML = message
+    }, 100)
 }
 
 // Allow other scripts to trigger toast notifications

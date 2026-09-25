@@ -20,6 +20,7 @@
                         contain at least 1 uppercase character, 1 lowercase character and 1 number
                     ",
                     "placeholder" => "Enter password...",
+                    "autocomplete" => "new-password",
                     "required" => true,
                     "validation_error_message" => ""
                 ]);
@@ -30,12 +31,13 @@
                     "type" => "password",
                     "label" => "Confirm Password",
                     "placeholder" => "Re-type password",
+                    "autocomplete" => "new-password",
                     "required" => true,
                     "validation_error_message" => ""
                 ]);
             ?>
             <input name="unique_token" type="hidden" value="<?php echo(esc($token)); // Hidden input containing unique token ?>">
-            <output class="message"></output>
+            <output class="message" role="alert"></output>
             <button type="submit" class="button primary relative">
                 <span class="btn-text">Reset Password</span>
                 <?php

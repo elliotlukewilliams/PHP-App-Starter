@@ -5,14 +5,14 @@
             Your account and profile will be permanently deleted. This can't be undone.
             You'll then be redirected to the homepage.
         </p>
-        <output></output>
+        <output role="alert"></output>
         <div class="flex items-center gap-6">
             <button type="submit" class="button primary w-1/2">
                 Confirm
             </button>
-            <div role="button" class="close-modal button secondary w-1/2">
+            <button type="button" data-autofocus class="close-modal button secondary w-1/2">
                 Cancel
-            </div>
+            </button>
         </div>
 
         <!-- Loading overlay -->
@@ -24,6 +24,7 @@
             <span class="block size-8 animate-spin">
                 <?php echo(get_svg_icon("loader")); ?>
             </span>
+            <span class="sr-only">Deleting account</span>
         </div>
     </form>
 </div>

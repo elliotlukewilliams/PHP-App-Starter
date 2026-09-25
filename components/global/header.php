@@ -21,6 +21,9 @@
     <title><?php echo(esc($title)); ?></title>
 </head>
 <body class="text-blue-950 font-poppins">
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:p-3 focus:rounded-md focus:shadow-md">
+        Skip to main content
+    </a>
     <header class="shadow-md bg-white">
         <div class="container mx-auto flex justify-between items-center gap-6 py-6">
             <a href="/" class="font-bold underline">
@@ -51,7 +54,7 @@
                                     ]);
                                 ?>
                             </button>
-                            <output class="logout-error"></output>
+                            <output class="logout-error" role="alert"></output>
                         </form>
                         </li>
                     <?php endif; ?>

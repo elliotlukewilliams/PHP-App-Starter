@@ -42,6 +42,7 @@ const toggleProfileImageEditPanel = () => {
         PROFILE_IMAGE_EDIT_TOGGLE.classList.remove(...triggerActiveClasses)
         editPanel.classList.add('hidden')
     }
+    PROFILE_IMAGE_EDIT_TOGGLE.setAttribute('aria-expanded', String(!isOpen))
 }
 
 const toggleLoadingState = (loaderId = 'profile-edit-loader') => {
@@ -101,6 +102,7 @@ const displayPreviewProfileImageUpdate = () => {
         let image = profilePictureContainer.querySelector('img.new-profile-image-preview')
         if (!image) {
             image = document.createElement('img')
+            image.alt = 'Your new profile picture'
             image.classList.add(
                 'new-profile-image-preview',
                 'size-full',

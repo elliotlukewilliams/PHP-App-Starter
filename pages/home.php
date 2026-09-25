@@ -4,13 +4,13 @@
         "meta_description" => "Welcome to the PHP-Docker-Starter template."
     ]);
 ?>
-<main class="bg-slate-50 min-h-screen">
-    <section class="py-56 bg-gradient-to-r from-blue-700 to-blue-200 text-white">
+<main id="main" tabindex="-1" class="bg-slate-50 min-h-screen outline-none">
+    <section class="py-56 bg-gradient-to-r from-blue-800 to-blue-600 text-white">
         <div class="container">
             <div class="max-w-4xl">
                 <h1 class="text-7xl mb-8">PHP-Docker Starter Template</h1>
                 <p class="text-xl mb-8">Your new app starts here!</p>
-                <a href="#main-content" class="group flex justify-center items-center bg-white rounded-full size-16">
+                <a href="#main-content" aria-label="Scroll to getting started" class="group flex justify-center items-center bg-white rounded-full size-16">
                     <span class="block size-10 group-hover:translate-y-1 transition-transform duration-200 ease-out">
                         <?php echo(get_svg_icon("arrow-down")); ?>
                     </span>

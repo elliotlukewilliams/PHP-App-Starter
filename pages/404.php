@@ -5,7 +5,7 @@
     ]);
 ?>
 
-<main class="bg-slate-50 min-h-screen">
+<main id="main" tabindex="-1" class="bg-slate-50 min-h-screen outline-none">
     <section class="py-32">
         <div class="container text-center">
             <h1 class="text-5xl mb-6">Page not found</h1>

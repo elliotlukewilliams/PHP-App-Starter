@@ -22,10 +22,11 @@
     data-component="modal"
     class="modal hidden fixed size-full top-0 z-10 bg-black/70" 
     role="dialog"
+    aria-modal="true"
     aria-hidden="true"
 >
     <?php if (!$persistent) : ?>
-        <button aria-label="Close modal" class="close-modal absolute inset-0"></button>
+        <button type="button" tabindex="-1" aria-hidden="true" class="close-modal absolute inset-0"></button>
     <?php endif; ?>
 
     <div class="z-20">

@@ -282,14 +282,15 @@
     }
 
     /**
-     * Get the contents of an SVG icon so it can be output inline
+     * Get the contents of an SVG icon so it can be output inline. Icons are decorative, so they're hidden
+     * from screen readers. Give icon-only buttons/links an aria-label instead
      * @param file_name - File name of the svg file in the icons folder (omit .svg)
      * @return string|false - The SVG file contents if found, false if not
      */
     function get_svg_icon(string $file_name) {
         $file_path = APP_ROOT . "/public/images/icons/{$file_name}.svg";
         if (file_exists($file_path)) {
-            return file_get_contents($file_path);
+            return preg_replace("/<svg\b/", "<svg aria-hidden=\"true\" focusable=\"false\"", file_get_contents($file_path), 1);
         }
         return false;
     }

@@ -8,6 +8,7 @@
                 "type" => "email",
                 "label" => "Email",
                 "placeholder" => "Enter email address...",
+                "autocomplete" => "email",
                 "required" => true,
                 "validation_error_message" => ""
             ]);
@@ -22,6 +23,7 @@
                     contain at least 1 uppercase character, 1 lowercase character and 1 number
                 ",
                 "placeholder" => "Think of a strong password",
+                "autocomplete" => "new-password",
                 "required" => true,
                 "validation_error_message" => ""
             ]);
@@ -31,11 +33,12 @@
                 "type" => "password",
                 "label" => "Confirm Password",
                 "placeholder" => "Re-type password",
+                "autocomplete" => "new-password",
                 "required" => true,
                 "validation_error_message" => ""
             ]);
         ?>
-        <output class="any-error"></output>
+        <output class="any-error" role="alert"></output>
         <button type="submit" class="button primary">
             <span class="btn-text">Submit</span>
             <?php get_component(path: "loader"); // Loading state ?>

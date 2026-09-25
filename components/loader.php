@@ -9,4 +9,5 @@
 ?>
 <span <?php if ($args["hidden"]) echo("aria-hidden=\"true\""); ?> class="loader <?php echo($args["wrapper_class"]); ?>">
     <?php echo(get_svg_icon("loader")); ?>
+    <span class="sr-only">Loading</span>
 </span>

@@ -31,11 +31,17 @@ const showErrorMessage = (formElement, errorField, errorMessage) => {
         errorInputValidationMessage.classList.add('active')
         errorInputValidationMessage.innerHTML = errorMessage
     }
+
+    // Mark the field as invalid so screen readers report it
+    if (errorField) {
+        formElement.querySelector(`input[name=${errorField}]`)?.setAttribute('aria-invalid', 'true')
+    }
 }
 
 const clearErrors = (formElement) => {
     const errors = formElement.querySelectorAll("output.active")
     errors.forEach(error => error.classList.remove("active"))
+    formElement.querySelectorAll('[aria-invalid]').forEach(field => field.removeAttribute('aria-invalid'))
 }
 
 const processLogin = async (formElement) => {
