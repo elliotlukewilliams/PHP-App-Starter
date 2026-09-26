@@ -8,6 +8,10 @@
     $meta_description = $args["meta_description"];
     $is_user_logged_in = get_logged_in_user();
     $is_dev = is_dev();
+
+    // Nav links: no underline, colour change on hover
+    $nav_link_class = "link-unset flex items-center gap-1.5 font-medium text-blue-950 hover:text-blue-700 transition-colors duration-200";
+    $nav_icon_class = "block size-4 shrink-0";
 ?>
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
@@ -26,24 +30,43 @@
     </a>
     <header class="shadow-md bg-white">
         <div class="container mx-auto flex justify-between items-center gap-6 py-6">
-            <a href="/" class="font-bold underline">
+            <a href="/" class="<?php echo($nav_link_class); ?> font-bold">
+                <span class="<?php echo($nav_icon_class); ?>"><?php echo(get_svg_icon("home")); ?></span>
                 Home
             </a>
-            <nav>
-                <ul class="flex items-center gap-4">
+            <nav aria-label="Main">
+                <ul class="flex items-center gap-6">
                     <?php if (!$is_user_logged_in): ?>
-                        <li><a href="/login">Log in</a></li>
-                        <li><a href="/signup">Sign up</a></li>
+                        <li>
+                            <a href="/login" class="<?php echo($nav_link_class); ?>">
+                                <span class="<?php echo($nav_icon_class); ?>"><?php echo(get_svg_icon("log-in")); ?></span>
+                                Log in
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/signup" class="<?php echo($nav_link_class); ?>">
+                                <span class="<?php echo($nav_icon_class); ?>"><?php echo(get_svg_icon("user-plus")); ?></span>
+                                Sign up
+                            </a>
+                        </li>
                     <?php endif; ?>
                     <?php
                         // Show log-out button as well as account if user is logged in
                         if ($is_user_logged_in) :
                     ?>
-                        <li><a href="/account">Account</a></li>
+                        <li>
+                            <a href="/account" class="<?php echo($nav_link_class); ?>">
+                                <span class="<?php echo($nav_icon_class); ?>"><?php echo(get_svg_icon("user")); ?></span>
+                                Account
+                            </a>
+                        </li>
                         <li>
                         <form id="logout-form" data-component="login">
                             <button type="submit" class="relative button primary">
-                                <span class="btn-text">Log out</span>
+                                <span class="btn-text flex items-center gap-2">
+                                    <span class="<?php echo($nav_icon_class); ?>"><?php echo(get_svg_icon("log-out")); ?></span>
+                                    Log out
+                                </span>
                                 <?php
                                     // Loading state 
                                     get_component(path: "loader", args: [

@@ -12,8 +12,10 @@
 ?>
 
 <main id="main" tabindex="-1" class="bg-slate-50 min-h-screen outline-none">
-    <section class="py-32">
-        <?php get_component(path: "signup"); ?>
+    <section class="py-16 lg:py-32">
+        <div class="container">
+            <?php get_component(path: "signup"); ?>
+        </div>
     </section>
 </main>
 

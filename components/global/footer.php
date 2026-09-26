@@ -3,8 +3,8 @@
     $vite_port = env("VITE_DEV_PORT", "5178");
 ?>
 
-    <footer>
-        This is the footer
+    <footer class="bg-blue-950 py-12 text-center text-white">
+        Footer
     </footer>
     <script
         src="<?php echo($is_dev ? "http://localhost:{$vite_port}/src/main.ts" : "/dist/main.js"); ?>"

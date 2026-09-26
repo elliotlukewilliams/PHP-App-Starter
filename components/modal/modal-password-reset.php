@@ -1,5 +1,5 @@
 <div class="relative container" data-component="password-reset-request">
-    <div class="rounded-md shadow-md p-6 bg-white z-20 fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 lg:max-w-sm animate-fade-in">
+    <div class="rounded-md shadow-md p-6 bg-white z-20 fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-10/12 lg:max-w-sm animate-fade-in">
         <div class="flex justify-end">
             <button type="button" aria-label="Close modal" class="close-modal block size-5 hover:opacity-50 transition-opacity duration-200 cursor-pointer">
                 <?php echo(get_svg_icon("x")); ?>
