@@ -14,13 +14,14 @@
     $position = $args["position"];
     $type = $args["type"];
 
-    // Conditional classes
+    // Conditional classes. Below lg the toast is always a full width bar fixed to the bottom of the screen;
+    // these set its position from lg upwards (resetting the full width insets it has on smaller screens)
     $position_class = match($position) {
-        "bottom-right" => "lg:bottom-12 lg:right-12",
-        "bottom-left" => "lg:bottom-12 lg:left-12",
-        "top-right" => "lg:top-12 lg:right-12",
-        "top-left" => "lg:top-12 lg:left-12",
-        default => "lg:bottom-12 lg:right-12"
+        "bottom-right" => "lg:bottom-12 lg:right-12 lg:left-auto",
+        "bottom-left" => "lg:bottom-12 lg:left-12 lg:right-auto",
+        "top-right" => "lg:top-12 lg:right-12 lg:left-auto lg:bottom-auto",
+        "top-left" => "lg:top-12 lg:left-12 lg:right-auto lg:bottom-auto",
+        default => "lg:bottom-12 lg:right-12 lg:left-auto"
     };
 
     $border_class = match($type) {
@@ -44,7 +45,11 @@
     role="status"
     aria-live="<?php echo($aria_live); ?>"
     aria-atomic="true"
-    class="toast-notification hidden animate-drift-up fixed flex items-center gap-12 justify-between max-w-md bg-white rounded-md p-6 shadow-md border <?php echo($toast_class); ?>"
+    class="
+        toast-notification hidden animate-drift-up fixed z-40 inset-x-0 bottom-0 flex items-center gap-6 justify-between bg-white p-6 shadow-md border-0 border-t
+        lg:max-w-md lg:gap-12 lg:rounded-md lg:border
+        <?php echo($toast_class); ?>
+    "
 >
     <div class="flex items-center gap-4">
         <?php if ($icon_svg) : ?>
@@ -55,6 +60,7 @@
         <p class="toast-text"><?php echo(esc($message)); ?></p>
     </div>
     <button
+        type="button"
         aria-label="Dismiss notification" 
         class="toast-dismiss block size-4 shrink-0 cursor-pointer hover:opacity-50 transition-opacity duration-200"
     >
