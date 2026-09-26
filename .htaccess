@@ -10,7 +10,7 @@ RewriteRule "(^|/)\.(?!well-known/)" - [F,L]
 # and static assets (dist, public) should be reachable directly
 RewriteRule ^(components|pages|migrations|vendor|node_modules|src)(/|$) - [F,L]
 RewriteRule ^includes/(?!endpoints/) - [F,L]
-RewriteRule ^(Dockerfile|docker-compose\.yml|start-app\.sh|composer\.(json|lock)|package(-lock)?\.json|tsconfig\.json|vite\.config\.ts)$ - [F,L]
+RewriteRule ^(Dockerfile|docker-compose\.yml|(start|preview)-app\.sh|composer\.(json|lock)|package(-lock)?\.json|tsconfig\.json|vite\.config\.ts)$ - [F,L]
 RewriteRule \.log$ - [F,L]
 
 RewriteCond %{REQUEST_FILENAME} !-f

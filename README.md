@@ -67,12 +67,14 @@ Ports and credentials are set in `.env`.
 **Other commands**
 
 ```bash
-npm run build                                  # Build production assets into dist/
+npm run build                                      # Build production assets into dist/
+./preview-app.sh                                   # Build, then preview the app in production mode
+./preview-app.sh dev                               # Switch back to development mode
 docker-compose exec web php migrations/index.php   # Run new migrations
-docker-compose down                            # Stop the containers
+docker-compose down                                # Stop the containers
 ```
 
-When `APP_ENV` is anything other than `local`, pages load the built assets from `dist/` instead of the Vite dev server.
+When `APP_ENV` is anything other than `local`, pages load the built assets from `dist/` instead of the Vite dev server, and PHP errors are hidden. `./preview-app.sh` restarts the web container with `APP_ENV=production` without editing `.env`, so you can check a production build on localhost. Safari won't keep you logged in during a preview, because the session cookie is marked `Secure`. Use Chrome or Firefox instead.
 
 ## Architecture
 
